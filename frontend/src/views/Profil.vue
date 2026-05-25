@@ -1,5 +1,21 @@
 <script setup>
-import { RouterLink } from 'vue-router'
+import { onMounted } from 'vue';
+import { RouterLink, useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/auth';
+
+const router = useRouter();
+const authStore = useAuthStore();
+
+onMounted(() => {
+  if (authStore.isAuthenticated && !authStore.user) {
+    authStore.fetchUser();
+  }
+});
+
+const handleLogout = async () => {
+  await authStore.logout();
+  router.push('/login');
+};
 </script>
 
 <template>
@@ -29,28 +45,7 @@ import { RouterLink } from 'vue-router'
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
             </div>
-            <h2 class="profile-name">Wowo</h2>
-          </div>
-
-          <!-- Deretan Statistik -->
-          <div class="stats-row">
-            <!-- Kartu Stat 1 -->
-            <div class="stat-card">
-              <span class="stat-number blue">1</span>
-              <span class="stat-label">Deteksi</span>
-            </div>
-            
-            <!-- Kartu Stat 2 -->
-            <div class="stat-card">
-              <span class="stat-number green">1</span>
-              <span class="stat-label">Bulan<br>Aktif</span>
-            </div>
-            
-            <!-- Kartu Stat 3 -->
-            <div class="stat-card">
-              <span class="stat-number orange">0</span>
-              <span class="stat-label">Konsultasi</span>
-            </div>
+            <h2 class="profile-name">{{ authStore.user?.name || 'Memuat...' }}</h2>
           </div>
 
           <!-- Bagian Pengaturan (Settings) -->
@@ -77,7 +72,7 @@ import { RouterLink } from 'vue-router'
               </button>
               
               <!-- Tombol Keluar (Logout) -->
-              <button class="settings-btn logout-btn">
+              <button class="settings-btn logout-btn" @click="handleLogout">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f44336" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
                 <span>Keluar</span>
               </button>

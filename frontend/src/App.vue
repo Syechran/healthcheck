@@ -1,5 +1,7 @@
 <script setup>
-import { RouterView, RouterLink } from 'vue-router'
+import { RouterView, RouterLink, useRoute } from 'vue-router'
+
+const route = useRoute()
 </script>
 
 <template>
@@ -11,7 +13,7 @@ import { RouterView, RouterLink } from 'vue-router'
     <RouterView />
 
     <!-- ================= Navigasi Bawah ================= -->
-    <nav class="bottom-nav">
+    <nav class="bottom-nav" v-if="!route.meta.guest">
       <!-- Container dalam agar ikon tidak terlalu melebar ke ujung layar -->
       <div class="nav-inner">
         <RouterLink to="/" class="nav-item" active-class="active" exact>

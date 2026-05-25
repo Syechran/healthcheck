@@ -1,5 +1,21 @@
 <script setup>
+import { ref, onMounted } from 'vue';
 import { RouterLink } from 'vue-router'
+import api from '../utils/axios';
+
+const history = ref([]);
+const isLoading = ref(true);
+
+onMounted(async () => {
+  try {
+    const response = await api.get('/detections');
+    history.value = response.data.data;
+  } catch (error) {
+    console.error('Failed to fetch history', error);
+  } finally {
+    isLoading.value = false;
+  }
+});
 </script>
 
 <template>
@@ -23,24 +39,22 @@ import { RouterLink } from 'vue-router'
         <div class="content-box">
           
           <!-- Judul Bagian -->
-          <h2 class="section-heading">Minggu ini</h2>
+          <h2 class="section-heading">Riwayat Deteksi</h2>
 
-          <!-- Kartu Item Riwayat -->
-          <div class="history-card">
-            <div class="card-left">
-              <span class="disease-name">Dermatitis</span>
-              <span class="severity-badge">Ringan</span>
-            </div>
-            
-            <div class="card-right">
-              <!-- Ikon Menu (Tiga Titik) -->
-              <button class="menu-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a0a0a0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="1.5"></circle>
-                  <circle cx="12" cy="5" r="1.5"></circle>
-                  <circle cx="12" cy="19" r="1.5"></circle>
-                </svg>
-              </button>
+          <div v-if="isLoading" class="info-state">Memuat riwayat...</div>
+          <div v-else-if="history.length === 0" class="info-state">Belum ada riwayat deteksi.</div>
+
+          <div v-else class="history-list">
+            <!-- Kartu Item Riwayat -->
+            <div class="history-card" v-for="item in history" :key="item.id">
+              <div class="card-left">
+                <span class="disease-name">{{ item.disease_name }}</span>
+                <span class="severity-badge" :class="item.severity">{{ item.severity_label }}</span>
+              </div>
+              
+              <div class="card-right">
+                <span class="date-text">{{ new Date(item.detected_at).toLocaleDateString('id-ID') }}</span>
+              </div>
             </div>
           </div>
 
@@ -122,22 +136,28 @@ import { RouterLink } from 'vue-router'
   margin-bottom: 24px;
 }
 
-/* --- Kartu Riwayat --- */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
 .history-card {
-  background-color: #e8f5e9; /* Hijau muda */
-  border: 1px solid #81c784; /* Border hijau */
-  border-radius: 30px; /* Bentuk melingkar seperti pil panjang */
+  background-color: #ffffff; 
+  border: 1px solid #e0e0e0;
+  border-radius: 20px; 
   padding: 16px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: background-color 0.2s, box-shadow 0.2s;
+  transition: box-shadow 0.2s;
   cursor: pointer;
+  width: 100%;
 }
 
 .history-card:hover {
-  background-color: #dcedc8;
-  box-shadow: 0 4px 12px rgba(129, 199, 132, 0.2);
+  box-shadow: 0 4px 12px rgba(0,0,0, 0.05);
 }
 
 .card-left {
@@ -149,16 +169,29 @@ import { RouterLink } from 'vue-router'
 .disease-name {
   font-size: 18px;
   font-weight: bold;
-  color: #2e7d32; /* Hijau tua */
+  color: #1a1a1a; 
 }
 
 .severity-badge {
-  background-color: #a5d6a7; /* Latar badge hijau sedikit gelap */
-  color: #1b5e20;
+  background-color: #f0f0f0; 
+  color: #666666;
   font-size: 12px;
   font-weight: 600;
   padding: 4px 12px;
   border-radius: 20px;
+}
+
+.severity-badge.mild {
+  background-color: #a5d6a7; 
+  color: #1b5e20;
+}
+.severity-badge.moderate {
+  background-color: #ffe082; 
+  color: #ff8f00;
+}
+.severity-badge.severe {
+  background-color: #ef9a9a; 
+  color: #c62828;
 }
 
 .card-right {
@@ -166,19 +199,14 @@ import { RouterLink } from 'vue-router'
   align-items: center;
 }
 
-.menu-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
-  border-radius: 50%;
-  transition: background-color 0.2s;
+.date-text {
+  font-size: 13px;
+  color: #a0a0a0;
 }
 
-.menu-btn:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+.info-state {
+  color: #888888;
+  font-style: italic;
+  padding: 20px 0;
 }
 </style>

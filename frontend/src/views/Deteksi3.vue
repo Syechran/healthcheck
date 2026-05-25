@@ -1,5 +1,21 @@
 <script setup>
+import { onMounted } from 'vue';
 import { RouterLink } from 'vue-router'
+import api from '../utils/axios';
+
+onMounted(async () => {
+  try {
+    await api.post('/detections', {
+      disease_name: "Dermatitis",
+      severity: "mild",
+      confidence: 90,
+      detected_area: "wajah",
+      notes: "Deteksi visual via foto dummy."
+    });
+  } catch (error) {
+    console.error('Failed to post detection result', error);
+  }
+});
 </script>
 
 <template>
